@@ -1,11 +1,11 @@
 import os
 import numpy as np
-import scipy.misc as m
+#import scipy.misc as m      #deprecated in latest version
 from PIL import Image
 from torch.utils import data
 from mypath import Path
-from torchvision import transforms
-from dataloaders import custom_transforms as tr
+from torchvision import transforms       # data augmentation
+from dataloaders import custom_transforms as tr     #data preprocessing
 
 class CityscapesSegmentation(data.Dataset):
     NUM_CLASSES = 19
@@ -24,6 +24,8 @@ class CityscapesSegmentation(data.Dataset):
 
         self.void_classes = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
         self.valid_classes = [7, 8, 11, 12, 13, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 31, 32, 33]
+
+        # self.class_names variable is not used in this file. I think unlabelled is not belong to this list.
         self.class_names = ['unlabelled', 'road', 'sidewalk', 'building', 'wall', 'fence', \
                             'pole', 'traffic_light', 'traffic_sign', 'vegetation', 'terrain', \
                             'sky', 'person', 'rider', 'car', 'truck', 'bus', 'train', \
@@ -42,13 +44,13 @@ class CityscapesSegmentation(data.Dataset):
 
     def __getitem__(self, index):
 
-        img_path = self.files[self.split][index].rstrip()
+        img_path = self.files[self.split][index].rstrip()   # rstrip() delete the right blank character.
         lbl_path = os.path.join(self.annotations_base,
                                 img_path.split(os.sep)[-2],
                                 os.path.basename(img_path)[:-15] + 'gtFine_labelIds.png')
 
         _img = Image.open(img_path).convert('RGB')
-        _tmp = np.array(Image.open(lbl_path), dtype=np.uint8)
+        _tmp = np.array(Image.open(lbl_path), dtype=np.uint8)   # convert to numpy array np.uint8. _tmp is a tensor of shape (H, W , C)
         _tmp = self.encode_segmap(_tmp)
         _target = Image.fromarray(_tmp)
 
@@ -80,11 +82,11 @@ class CityscapesSegmentation(data.Dataset):
 
     def transform_tr(self, sample):
         composed_transforms = transforms.Compose([
-            tr.RandomHorizontalFlip(),
+            tr.RandomHorizontalFlip(),      # 50% of the images will be flipped
             tr.RandomScaleCrop(base_size=self.args.base_size, crop_size=self.args.crop_size, fill=255),
-            tr.RandomGaussianBlur(),
-            tr.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
-            tr.ToTensor()])
+            tr.RandomGaussianBlur(),        # 50% chance of applying gaussian blur
+            tr.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),        # from imagenet ,first 0-255 -> 0-1, then normalize. -> -σ1,σ1
+            tr.ToTensor()])     # convert to tensor of shape (C, H, W)
 
         return composed_transforms(sample)
 
@@ -122,9 +124,9 @@ if __name__ == '__main__':
     dataloader = DataLoader(cityscapes_train, batch_size=2, shuffle=True, num_workers=2)
 
     for ii, sample in enumerate(dataloader):
-        for jj in range(sample["image"].size()[0]):
-            img = sample['image'].numpy()
-            gt = sample['label'].numpy()
+        for jj in range(sample["image"].size()[0]):     # shape of sample['image']: torch.Size([2, 3, 513, 513])here
+            img = sample['image'].numpy()   # shape of sample['image']: torch.Size([2, 3, 513, 513])
+            gt = sample['label'].numpy()    # shape of sample['label']: torch.Size([2, 513, 513])
             tmp = np.array(gt[jj]).astype(np.uint8)
             segmap = decode_segmap(tmp, dataset='cityscapes')
             img_tmp = np.transpose(img[jj], axes=[1, 2, 0])
@@ -132,15 +134,26 @@ if __name__ == '__main__':
             img_tmp += (0.485, 0.456, 0.406)
             img_tmp *= 255.0
             img_tmp = img_tmp.astype(np.uint8)
-            plt.figure()
-            plt.title('display')
-            plt.subplot(211)
-            plt.imshow(img_tmp)
-            plt.subplot(212)
-            plt.imshow(segmap)
+
+
+            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
+            fig.suptitle('display')
+            ax1.imshow(img_tmp)
+            ax1.set_title('Image')
+            ax2.imshow(segmap)
+            ax2.set_title('Segmentation Map')
+            plt.tight_layout()
+
+            # next 6 lines are original code.
+            # plt.figure()
+            # plt.title('display')
+            # plt.subplot(211)    #211 means 2 rows, 1 column, first plot
+            # plt.imshow(img_tmp)
+            # plt.subplot(212)
+            # plt.imshow(segmap)
 
         if ii == 1:
             break
 
-    plt.show(block=True)
+    plt.show(block=True)    # block the process until closed.
 

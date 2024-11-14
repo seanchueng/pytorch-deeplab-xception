@@ -6,7 +6,9 @@ class Path(object):
         elif dataset == 'sbd':
             return '/path/to/datasets/benchmark_RELEASE/'  # folder that contains dataset/.
         elif dataset == 'cityscapes':
-            return '/path/to/datasets/cityscapes/'     # foler that contains leftImg8bit/
+            # return '/path/to/datasets/cityscapes/'     # foler that contains leftImg8bit/
+            # return 'C:\\Users\\zxhom\\PycharmProjects\\pytorch-deeplab-xception\\path\\to\\datasets\\cityscapes'  absolute path
+            return '../../path/to/datasets/cityscapes/' # relative to /dataloader/datasets/cityscapes.py
         elif dataset == 'coco':
             return '/path/to/datasets/coco/'
         else:
