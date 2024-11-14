@@ -48,7 +48,7 @@ def decode_segmap(label_mask, dataset, plot=False):
         return rgb
 
 
-def encode_segmap(mask):
+def encode_segmap(mask):    # this function is for pascal voc dataset.
     """Encode segmentation label images as pascal classes
     Args:
         mask (np.ndarray): raw segmentation label image of dimension

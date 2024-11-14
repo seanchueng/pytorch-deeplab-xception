@@ -140,7 +140,7 @@ if __name__ == '__main__':
             fig.suptitle('display')
             ax1.imshow(img_tmp)
             ax1.set_title('Image')
-            ax2.imshow(segmap)
+            ax2.imshow(segmap)      # segmap's all the value is bewteen 0-1,since imshow() can handle 0-1 or 0-255.
             ax2.set_title('Segmentation Map')
             plt.tight_layout()
 
