@@ -240,10 +240,10 @@ def main():
                         help='set the checkpoint name')
     # finetuning pre-trained models
     parser.add_argument('--ft', action='store_true', default=False,
-                        help='finetuning on a different dataset')
+                        help='fine-tuning on a different dataset')
     # evaluation option
     parser.add_argument('--eval-interval', type=int, default=1,
-                        help='evaluuation interval (default: 1)')
+                        help='evaluation interval (default: 1)')
     parser.add_argument('--no-val', action='store_true', default=False,
                         help='skip validation during training')
 
@@ -289,6 +289,7 @@ def main():
         args.checkname = 'deeplab-'+str(args.backbone)
     print(args)
     torch.manual_seed(args.seed)
+    torch.cuda.manual_seed_all(args.seed) # 我新加入的代码，确保所有 GPU 上的随机数生成器都使用相同的种子
     trainer = Trainer(args)
     print('Starting Epoch:', trainer.args.start_epoch)
     print('Total Epoches:', trainer.args.epochs)
