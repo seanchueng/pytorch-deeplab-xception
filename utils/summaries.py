@@ -4,6 +4,8 @@ from torchvision.utils import make_grid
 from tensorboardX import SummaryWriter
 from dataloaders.utils import decode_seg_map_sequence
 
+# pip install torchvision==0.14.1 deal this "TypeError: make_grid() got an unexpected keyword argument 'range'"
+
 class TensorboardSummary(object):
     def __init__(self, directory):
         self.directory = directory
